@@ -10,6 +10,7 @@ const IconDisc = () => <i className="fas fa-compact-disc" />;
 const IconYoutube = () => <i className="fab fa-youtube" />;
 const IconClose = () => <i className="fas fa-times" />;
 const IconCalendar = () => <i className="far fa-calendar-alt" />;
+const IconClear = () => <i className="fas fa-times-circle" />;
 
 const App: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<Category>('all');
@@ -22,13 +23,28 @@ const App: React.FC = () => {
     setIsLoaded(true);
   }, []);
 
+  // Enhanced search logic: Token-based matching (AND operator) across all fields
   const filteredSongs = useMemo(() => {
+    const normalizedSearch = searchTerm.toLowerCase().trim();
+    
+    // Optimization: If search is empty, just filter by category
+    if (!normalizedSearch) {
+       return activeCategory === 'all' 
+         ? SONGS 
+         : SONGS.filter(song => song.category === activeCategory);
+    }
+
+    const searchTokens = normalizedSearch.split(/\s+/);
+
     return SONGS.filter((song) => {
       const matchesCategory = activeCategory === 'all' || song.category === activeCategory;
-      const matchesSearch =
-        song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        song.artist.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        song.year.toString().includes(searchTerm);
+      
+      // Combine fields for searching. 
+      const songData = `${song.title} ${song.artist} ${song.year} ${song.category}`.toLowerCase();
+      
+      // Check if EVERY token exists in the song data
+      const matchesSearch = searchTokens.every(token => songData.includes(token));
+      
       return matchesCategory && matchesSearch;
     });
   }, [activeCategory, searchTerm]);
@@ -39,6 +55,10 @@ const App: React.FC = () => {
 
   const closeToast = () => {
     setActiveSong(null);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
   };
 
   const categories: { id: Category; label: string }[] = [
@@ -61,7 +81,10 @@ const App: React.FC = () => {
 
       {/* Navigation */}
       <nav className={`sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-white/10 backdrop-blur-xl bg-slate-900/60 transition-all duration-700 transform ${isLoaded ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
-        <div className="flex items-center gap-3 group cursor-pointer">
+        <div 
+            className="flex items-center gap-3 group cursor-pointer" 
+            onClick={() => { setActiveCategory('all'); setSearchTerm(''); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        >
           <div className="p-2 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg shadow-lg shadow-pink-500/20 group-hover:shadow-pink-500/40 transition-all duration-300">
              <IconList />
           </div>
@@ -82,8 +105,17 @@ const App: React.FC = () => {
               placeholder="곡명, 아티스트 또는 연도 검색..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900/80 border border-slate-700 rounded-full py-2.5 pl-10 pr-6 text-sm focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/50 text-slate-200 placeholder-slate-500 transition-all shadow-inner"
+              className="w-full bg-slate-900/80 border border-slate-700 rounded-full py-2.5 pl-10 pr-10 text-sm focus:outline-none focus:border-pink-500/50 focus:ring-1 focus:ring-pink-500/50 text-slate-200 placeholder-slate-500 transition-all shadow-inner"
             />
+            {searchTerm && (
+              <button 
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                aria-label="Clear search"
+              >
+                <IconClear />
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -91,16 +123,23 @@ const App: React.FC = () => {
       <main className="max-w-5xl mx-auto px-4 py-8 relative z-10">
         
         {/* Header Section */}
-        <div className={`mb-10 text-center sm:text-left transition-all duration-1000 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <h2 className="text-3xl sm:text-4xl font-extrabold mb-3 tracking-tight text-white drop-shadow-lg">
+        <div className={`mb-12 text-center sm:text-left transition-all duration-1000 delay-100 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <h2 className="text-3xl sm:text-4xl font-extrabold mb-6 tracking-tight text-white drop-shadow-lg">
             통합 플레이리스트
             <span className="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 text-lg sm:text-2xl ml-0 sm:ml-3 font-semibold uppercase tracking-widest">
               Full Collection
             </span>
           </h2>
-          <p className="text-slate-400 text-sm max-w-2xl leading-relaxed mx-auto sm:mx-0">
-            Cristian, Gabriella, Marco, Sara, Daniel, Desiree, Gero, Miglė 채널의 모든 곡이 포함되었습니다.
-          </p>
+          
+          <div className="relative group inline-block">
+             <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+             <div className="relative p-5 sm:p-6 rounded-2xl bg-slate-900/80 border border-white/10 backdrop-blur-xl max-w-3xl mx-auto sm:mx-0 shadow-2xl">
+                <p className="text-lg sm:text-xl text-slate-200 font-medium leading-relaxed">
+                  <span className="text-pink-400 font-bold drop-shadow-[0_0_15px_rgba(236,72,153,0.3)]">Cristian, Gabriella, Marco, Sara, Daniel, Desiree, Gero, Miglė</span>
+                  <span className="block sm:inline text-slate-400 text-sm sm:text-base mt-2 sm:mt-0 sm:ml-2">채널의 모든 곡이 포함되었습니다.</span>
+                </p>
+             </div>
+          </div>
         </div>
 
         {/* Filter Tabs */}
@@ -126,13 +165,23 @@ const App: React.FC = () => {
         {/* Mobile Search */}
         <div className="sm:hidden mb-8 relative group">
            <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl blur opacity-20 group-focus-within:opacity-40 transition-opacity"></div>
-           <input 
-            type="text" 
-            placeholder="검색..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="relative w-full bg-slate-800/90 border border-slate-700/50 rounded-xl py-3.5 px-5 text-sm focus:outline-none focus:border-pink-500/50 text-white placeholder-slate-500"
-          />
+           <div className="relative">
+             <input 
+              type="text" 
+              placeholder="검색..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="relative w-full bg-slate-800/90 border border-slate-700/50 rounded-xl py-3.5 px-5 pr-12 text-sm focus:outline-none focus:border-pink-500/50 text-white placeholder-slate-500"
+            />
+             {searchTerm && (
+              <button 
+                onClick={clearSearch}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors z-10"
+              >
+                <IconClear />
+              </button>
+            )}
+           </div>
         </div>
 
         {/* Table Header */}
@@ -152,7 +201,7 @@ const App: React.FC = () => {
                 key={`${song.title}-${index}`}
                 onClick={() => handlePlay(song)}
                 className={`group grid grid-cols-12 px-4 py-4 items-center rounded-xl cursor-pointer border border-transparent hover:border-pink-500/20 hover:bg-white/5 transition-all duration-300 animate-fadeIn`}
-                style={{ animationDelay: `${index * 30}ms` }}
+                style={{ animationDelay: `${Math.min(index * 30, 500)}ms` }}
               >
                 <div className="col-span-1 text-xs text-slate-600 font-mono group-hover:text-pink-500 transition-colors">
                   {String(index + 1).padStart(2, '0')}
@@ -202,6 +251,14 @@ const App: React.FC = () => {
                 </div>
                 <p className="text-lg">검색 결과가 없습니다.</p>
                 <p className="text-sm opacity-50 mt-2">다른 검색어로 시도해보세요.</p>
+                {searchTerm && (
+                   <button 
+                     onClick={clearSearch}
+                     className="mt-4 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-500 hover:bg-pink-500 hover:text-white transition-all text-sm font-bold"
+                   >
+                     검색어 초기화
+                   </button>
+                )}
              </div>
           )}
         </div>
