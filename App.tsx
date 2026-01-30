@@ -207,6 +207,16 @@ const App: React.FC = () => {
         </div>
       </main>
 
+      {/* Footer / Credits */}
+      <footer className="relative z-10 py-12 text-center">
+        <div className="inline-flex items-center justify-center px-8 py-3 rounded-full bg-slate-900/60 border border-white/10 backdrop-blur-md shadow-xl">
+           <span className="text-slate-400 text-xs sm:text-sm font-bold tracking-widest uppercase mr-3">Produced by</span>
+           <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 font-black text-sm sm:text-lg tracking-wider drop-shadow-sm">
+             DJ Doberman
+           </span>
+        </div>
+      </footer>
+
       {/* Floating Player Toast */}
       <div 
         className={`fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-lg p-[1px] rounded-2xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 z-[100] transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) ${activeSong ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-[150%] opacity-0 scale-95'}`}
