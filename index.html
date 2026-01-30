@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bachata Master Playlist - Full Database</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .list-row:hover { background-color: rgba(255, 255, 255, 0.05); transition: all 0.2s ease; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+</head>
+<body class="overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass px-6 py-4 flex justify-between items-center border-b border-slate-800">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-list-ul text-pink-500 text-xl"></i>
+            <h1 class="text-xl font-bold tracking-tighter uppercase">Bachata <span class="text-pink-500">Database</span></h1>
+        </div>
+        <div class="relative w-1/2 max-w-md hidden sm:block">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+            <input type="text" id="searchInput" placeholder="곡명 또는 아티스트 검색..." class="w-full bg-slate-900/50 border border-slate-700 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-pink-500 transition-all">
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 py-8">
+        
+        <!-- Header Section -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-2">통합 플레이리스트 (Full Collection)</h2>
+            <p class="text-slate-400 text-sm">Cristian, Gabriella, Marco, Sara, Daniel, Desiree, Gero, Miglė 채널의 모든 곡이 포함되었습니다.</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-800 pb-4">
+            <button onclick="filterSongs('all')" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-pink-500 text-white transition-all">ALL</button>
+            <button onclick="filterSongs('legend')" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-all">3대장 (LEGEND)</button>
+            <button onclick="filterSongs('sensual')" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-all">센슈얼 (SENSUAL)</button>
+            <button onclick="filterSongs('remix')" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-all">리믹스 (REMIX)</button>
+            <button onclick="filterSongs('others')" class="filter-btn text-xs font-bold px-4 py-2 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-all">기타/전문가용 (OTHERS)</button>
+        </div>
+
+        <!-- Mobile Search (Visible only on mobile) -->
+        <div class="sm:hidden mb-6">
+            <input type="text" id="mobileSearchInput" placeholder="검색..." class="w-full bg-slate-800 border border-slate-700 rounded-xl py-3 px-4 text-sm focus:outline-none">
+        </div>
+
+        <!-- Table Header -->
+        <div class="grid grid-cols-12 px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800">
+            <div class="col-span-1">#</div>
+            <div class="col-span-5 sm:col-span-5">Title</div>
+            <div class="col-span-4 sm:col-span-4 text-center">Artist</div>
+            <div class="col-span-2 text-right">Action</div>
+        </div>
+
+        <!-- Song List Container -->
+        <div id="songList" class="divide-y divide-slate-800/50">
+            <!-- JavaScript will populate this -->
+        </div>
+
+        <div id="noResults" class="hidden py-20 text-center text-slate-500">
+            <i class="fas fa-search mb-4 text-3xl opacity-20"></i>
+            <p>검색 결과가 없습니다.</p>
+        </div>
+    </main>
+
+    <!-- Floating Player Toast -->
+    <div id="playerToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass p-4 rounded-2xl border border-pink-500/30 shadow-2xl translate-y-32 transition-all duration-500 z-[100]">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-violet-600 rounded-full flex items-center justify-center animate-spin-slow">
+                <i class="fas fa-compact-disc text-white"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p id="toastTitle" class="font-bold text-sm truncate text-white">Song Title</p>
+                <p id="toastArtist" class="text-xs text-slate-400 truncate">Artist Name</p>
+            </div>
+            <a id="youtubeLink" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase transition-colors">
+                <i class="fab fa-youtube mr-1"></i> Play
+            </a>
+            <button onclick="closeToast()" class="text-slate-500 hover:text-white px-2"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const songs = [
+            // 1. Legend (Prince Royce, Romeo Santos, Aventura)
+            { title: "Inmortal", artist: "Aventura", category: "legend" },
+            { title: "Dile al Amor", artist: "Aventura", category: "legend" },
+            { title: "Obsesión", artist: "Aventura", category: "legend" },
+            { title: "Carita de Inocente", artist: "Prince Royce", category: "legend" },
+            { title: "Te Espero", artist: "Prince Royce ft. Maria Becerra", category: "legend" },
+            { title: "Deja Vu", artist: "Prince Royce & Shakira", category: "legend" },
+            { title: "No Me Olvides", artist: "Prince Royce", category: "legend" },
+            { title: "Borrador", artist: "Prince Royce", category: "legend" },
+            { title: "Tu Feo", artist: "Prince Royce ft. Lenny Tavarez", category: "legend" },
+            { title: "Go Your Own Way", artist: "Prince Royce ft. This City", category: "legend" },
+            { title: "Propuesta Indecente", artist: "Romeo Santos", category: "legend" },
+            { title: "Perjurio", artist: "Romeo Santos", category: "legend" },
+            { title: "Boomerang", artist: "Romeo Santos", category: "legend" },
+            { title: "Eres Mía", artist: "Romeo Santos", category: "legend" },
+
+            // 2. Sensual (Pinto Picasso, Mayinbito, Montelier)
+            { title: "Vanidad", artist: "Pinto Picasso", category: "sensual" },
+            { title: "Que Pena", artist: "Pinto Picasso", category: "sensual" },
+            { title: "Feeling Something", artist: "Pinto Picasso", category: "sensual" },
+            { title: "París", artist: "Pinto Picasso", category: "sensual" },
+            { title: "Aceptalo", artist: "Pinto Picasso ft. Sebas Garreta", category: "sensual" },
+            { title: "Besos Mojados", artist: "Mayinbito", category: "sensual" },
+            { title: "Creme de la creme", artist: "Mayinbito", category: "sensual" },
+            { title: "Confía", artist: "Mayinbito ft. Jay Ramirez", category: "sensual" },
+            { title: "Mil Pedazos", artist: "Mayinbito ft. Ralphy Dreamz", category: "sensual" },
+            { title: "Entre Pasillos", artist: "Mayinbito ft. Sonce", category: "sensual" },
+            { title: "Mientele", artist: "Mayinbito ft. Roman", category: "sensual" },
+            { title: "Alma", artist: "Montelier ft. DJ Husky", category: "sensual" },
+            { title: "El Amor de mi Vida", artist: "Montelier", category: "sensual" },
+            { title: "Insomnio", artist: "Shama ft. DJ Husky", category: "sensual" },
+
+            // 3. Remix (Pop, Reggaeton Remixes)
+            { title: "Si Antes Te Hubiera Conocido", artist: "Karol G (Bachata Remix)", category: "remix" },
+            { title: "Provenza", artist: "Karol G (Bachata Remix)", category: "remix" },
+            { title: "MAMIII", artist: "Karol G (Bachata Remix)", category: "remix" },
+            { title: "TQG", artist: "Karol G ft. Shakira (Remix)", category: "remix" },
+            { title: "Hentai", artist: "Rosalía (Bachata Remix)", category: "remix" },
+            { title: "Despechá", artist: "Rosalía (Bachata Remix)", category: "remix" },
+            { title: "Monotonía", artist: "Shakira & Ozuna", category: "remix" },
+            { title: "Crazy in Love", artist: "Beyoncé (Bachata Remix)", category: "remix" },
+            { title: "Sobrio", artist: "Maluma (Bachata Remix)", category: "remix" },
+            { title: "Cupido", artist: "Tini (Bachata Remix)", category: "remix" },
+            { title: "Un Finde", artist: "FMK (Bachata Remix)", category: "remix" },
+            { title: "Bebé", artist: "Camilo & El Alfa (Remix)", category: "remix" },
+            { title: "Lala", artist: "Myke Towers (Bachata Remix)", category: "remix" },
+            { title: "Vagabundo", artist: "Sebastian Yatra (Remix)", category: "remix" },
+            { title: "Ella Baila Sola", artist: "Eslabon Armado (Remix)", category: "remix" },
+
+            // 4. Emotional & Others (Artists, DJ Husky, SP Polanco)
+            { title: "Palabritas", artist: "Daniel Santacruz", category: "others" },
+            { title: "Salvame", artist: "Daniel Santacruz", category: "others" },
+            { title: "Bachata Bolero", artist: "Grupo Extra", category: "others" },
+            { title: "Si Fueras Mía", artist: "Grupo Extra", category: "others" },
+            { title: "En Medio de la Noche", artist: "Chelion", category: "others" },
+            { title: "Mi Vida", artist: "Chelion", category: "others" },
+            { title: "Apretaito", artist: "Charles Luis", category: "others" },
+            { title: "El Tonto", artist: "Charles Luis ft. DJ Nico", category: "others" },
+            { title: "Dicelo", artist: "Román ft. Kira Brown", category: "others" },
+            { title: "Mi Refe", artist: "Román ft. Blaraya", category: "others" },
+            { title: "Caer", artist: "Sebas Garreta", category: "others" },
+            { title: "With or Without You", artist: "Jhonny Sky (Bachata Ver.)", category: "others" },
+            { title: "Por Que Te Niegas", artist: "Mickey Then ft. Jr", category: "others" },
+            { title: "Bailame", artist: "DJ Husky", category: "others" },
+            { title: "El Acuerdo", artist: "DJ Husky (Mashup)", category: "others" },
+            { title: "Proceso", artist: "SP Polanco", category: "others" },
+            { title: "Anónimos", artist: "SP Polanco", category: "others" },
+            { title: "Escalofríos", artist: "SP Polanco", category: "others" },
+            { title: "Masoquista", artist: "Performance Only", category: "others" },
+            { title: "Un Movimiento", artist: "Performance Only", category: "others" },
+            { title: "Khe", artist: "Many Rod & DJ Tronky", category: "others" },
+            { title: "La Bachata", artist: "Manuel Turizo", category: "others" },
+            { title: "TBT", artist: "Sebastian Yatra", category: "others" },
+            { title: "Mas Bella", artist: "Jahil Lopez", category: "others" },
+            { title: "Ta Ma Buena Que Tu", artist: "Unknown", category: "others" },
+            { title: "Calumnia", artist: "Various Artists", category: "others" },
+            { title: "Only You", artist: "Various Artists", category: "others" },
+            { title: "La Estrategia", artist: "Various Artists", category: "others" }
+        ];
+
+        const songList = document.getElementById('songList');
+        const searchInput = document.getElementById('searchInput');
+        const mobileSearchInput = document.getElementById('mobileSearchInput');
+        const noResults = document.getElementById('noResults');
+
+        function renderSongs(songsToRender) {
+            if (songsToRender.length === 0) {
+                songList.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+            noResults.classList.add('hidden');
+            
+            songList.innerHTML = songsToRender.map((song, index) => `
+                <div class="list-row grid grid-cols-12 px-4 py-4 items-center cursor-pointer group" onclick="playSong('${song.title}', '${song.artist}')">
+                    <div class="col-span-1 text-xs text-slate-600 font-mono">${String(index + 1).padStart(2, '0')}</div>
+                    <div class="col-span-5 sm:col-span-5 pr-2">
+                        <p class="font-semibold text-sm sm:text-base text-slate-200 truncate group-hover:text-pink-400 transition-colors">${song.title}</p>
+                        <span class="sm:hidden text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-500 uppercase font-bold">${song.category}</span>
+                    </div>
+                    <div class="col-span-4 sm:col-span-4 text-xs sm:text-sm text-center text-slate-400 truncate">${song.artist}</div>
+                    <div class="col-span-2 text-right">
+                        <span class="hidden sm:inline-block text-[10px] px-2 py-1 rounded bg-slate-800 text-slate-500 uppercase font-bold mr-4">${song.category}</span>
+                        <i class="fas fa-play-circle text-slate-700 group-hover:text-pink-500 text-lg transition-colors"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterSongs(category) {
+            const btns = document.querySelectorAll('.filter-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('bg-pink-500', 'text-white');
+                btn.classList.add('bg-slate-800', 'text-slate-400');
+            });
+            event.target.classList.add('bg-pink-500', 'text-white');
+            event.target.classList.remove('bg-slate-800', 'text-slate-400');
+
+            if (category === 'all') {
+                renderSongs(songs);
+            } else {
+                const filtered = songs.filter(s => s.category === category);
+                renderSongs(filtered);
+            }
+        }
+
+        function playSong(title, artist) {
+            const toast = document.getElementById('playerToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastArtist = document.getElementById('toastArtist');
+            const youtubeLink = document.getElementById('youtubeLink');
+
+            toastTitle.innerText = title;
+            toastArtist.innerText = artist;
+            youtubeLink.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' ' + title + ' bachata')}`;
+
+            toast.classList.remove('translate-y-32');
+        }
+
+        function closeToast() {
+            document.getElementById('playerToast').classList.add('translate-y-32');
+        }
+
+        function handleSearch(e) {
+            const val = e.target.value.toLowerCase();
+            const filtered = songs.filter(s => 
+                s.title.toLowerCase().includes(val) || 
+                s.artist.toLowerCase().includes(val)
+            );
+            renderSongs(filtered);
+        }
+
+        searchInput.addEventListener('input', handleSearch);
+        mobileSearchInput.addEventListener('input', handleSearch);
+
+        // Initial Load
+        renderSongs(songs);
+    </script>
+
+    <style>
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 12s linear infinite;
+        }
+    </style>
+ <script type="module" src="/index.tsx"></script></body>
+</html>
